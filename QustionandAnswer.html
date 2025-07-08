@@ -1,41 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Ultimate Quiz Game</title>
   <style>
     * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
     }
 
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
       display: flex;
-      background: var(--bg);
-      color: var(--text);
-      transition: background 0.3s, color 0.3s;
-    }
-
-    :root {
-      --bg: #ffffff;
-      --text: #000000;
-      --card: #f0f0f0;
-      --correct: #4caf50;
-      --wrong: #f44336;
-    }
-
-    body.dark {
-      --bg: #121212;
-      --text: #ffffff;
-      --card: #1e1e1e;
+      min-height: 100vh;
+      background-color: #f2f2f2;
     }
 
     .side-panel {
       width: 120px;
-      padding: 10px;
+      background: #e0e0e0;
       display: flex;
       flex-wrap: wrap;
+      padding: 10px;
       gap: 6px;
       justify-content: center;
       align-content: flex-start;
@@ -44,22 +31,28 @@
     .number-box {
       width: 30px;
       height: 30px;
-      background-color: #ccc;
+      border-radius: 5px;
+      background-color: #bbb;
       display: flex;
       justify-content: center;
       align-items: center;
-      border-radius: 4px;
       font-weight: bold;
+      font-size: 14px;
     }
 
     .correct {
-      background-color: var(--correct) !important;
-      color: #fff;
+      background-color: #4caf50 !important;
+      color: white;
     }
 
     .wrong {
-      background-color: var(--wrong) !important;
-      color: #fff;
+      background-color: #f44336 !important;
+      color: white;
+    }
+
+    .timeout {
+      background-color: orange !important;
+      color: white;
     }
 
     .quiz-container {
@@ -68,27 +61,34 @@
     }
 
     .question-box {
-      font-size: 22px;
+      font-size: 20px;
       margin-bottom: 20px;
     }
 
     .options {
       display: flex;
       flex-direction: column;
+      gap: 10px;
     }
 
     .option {
-      background: var(--card);
       padding: 12px;
-      margin: 5px 0;
-      border: 1px solid #888;
+      border: 1px solid #666;
       border-radius: 6px;
       cursor: pointer;
+      background: white;
     }
 
     .option:hover {
-      background-color: var(--correct);
+      background-color: #4caf50;
       color: white;
+    }
+
+    #timer {
+      font-weight: bold;
+      margin-bottom: 15px;
+      font-size: 16px;
+      color: #333;
     }
 
     #score-area {
@@ -97,43 +97,23 @@
     }
 
     #leaderboard {
-      margin-top: 15px;
-    }
-
-    #timer {
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .mode-toggle {
-      padding: 5px 10px;
-      cursor: pointer;
-      border: none;
-      border-radius: 4px;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
+
   <div class="side-panel" id="progressPanel"></div>
 
   <div class="quiz-container">
-    <div class="top-bar">
-      <div id="timer">Time: 10s</div>
-      <button class="mode-toggle" onclick="toggleMode()">Toggle Mode</button>
-    </div>
+    <div id="timer">Time left: <span id="timeLeft">10</span> sec</div>
     <div class="question-box" id="question"></div>
     <div class="options" id="options"></div>
 
     <div id="score-area">
       <h2>Game Over! Your Score: <span id="score"></span></h2>
       <input type="text" id="username" placeholder="Your Name" />
-      <button onclick="addToLeaderboard()">Add to Leaderboard</button>
+      <button onclick="addToLeaderboard()">Submit Score</button>
       <div id="leaderboard"></div>
     </div>
   </div>
@@ -151,19 +131,19 @@
       { q: 'Fastest animal?', a: 'Cheetah', o: ['Cheetah', 'Leopard', 'Tiger', 'Lion'] },
       { q: 'First prime number?', a: '2', o: ['2', '3', '1', '5'] },
       { q: 'Result of 9*9?', a: '81', o: ['81', '72', '99', '90'] },
-      { q: 'Current unit of wire?', a: 'Ampere', o: ['Ampere', 'Volt', 'Watt', 'Ohm'] },
+      { q: 'Current of wire?', a: 'Ampere', o: ['Ampere', 'Volt', 'Watt', 'Ohm'] },
       { q: 'Symbol of Gold?', a: 'Au', o: ['Au', 'Ag', 'Gd', 'Pb'] },
       { q: 'Largest ocean?', a: 'Pacific', o: ['Pacific', 'Atlantic', 'Indian', 'Arctic'] },
       { q: 'Planet known as red?', a: 'Mars', o: ['Mars', 'Jupiter', 'Venus', 'Neptune'] },
-      { q: '5th planet from Sun?', a: 'Jupiter', o: ['Jupiter', 'Saturn', 'Mars', 'Earth'] },
+      { q: '5th planet?', a: 'Jupiter', o: ['Jupiter', 'Saturn', 'Mars', 'Earth'] },
       { q: 'H2O is?', a: 'Water', o: ['Water', 'Hydrogen', 'Oxygen', 'Ice'] },
-      { q: 'Keyboard shortcut for copy?', a: 'Ctrl+C', o: ['Ctrl+C', 'Ctrl+X', 'Ctrl+V', 'Ctrl+Z'] },
-      { q: 'Triangle angle total?', a: '180', o: ['180', '360', '90', '120'] },
-      { q: 'Hardest natural substance?', a: 'Diamond', o: ['Diamond', 'Steel', 'Gold', 'Quartz'] },
-      { q: 'Google CEO in 2023?', a: 'Sundar Pichai', o: ['Sundar Pichai', 'Satya Nadella', 'Elon Musk', 'Tim Cook'] },
-      { q: 'First periodic table element?', a: 'Hydrogen', o: ['Hydrogen', 'Helium', 'Oxygen', 'Lithium'] },
+      { q: 'Keyboard key for copy?', a: 'Ctrl+C', o: ['Ctrl+C', 'Ctrl+X', 'Ctrl+V', 'Ctrl+Z'] },
+      { q: 'Angle in triangle?', a: '180', o: ['180', '360', '90', '120'] },
+      { q: 'Hardest substance?', a: 'Diamond', o: ['Diamond', 'Steel', 'Gold', 'Quartz'] },
+      { q: 'Google CEO 2023?', a: 'Sundar Pichai', o: ['Sundar Pichai', 'Satya Nadella', 'Elon Musk', 'Tim Cook'] },
+      { q: 'First element in periodic table?', a: 'Hydrogen', o: ['Hydrogen', 'Helium', 'Oxygen', 'Lithium'] },
       { q: 'Sun rises from?', a: 'East', o: ['East', 'West', 'North', 'South'] },
-      { q: 'Capital of UAE?', a: 'Abu Dhabi', o: ['Lahore', 'Islamabad', 'Abu Dhabi', 'Sayalcoat'] },
+      { q: 'Taj Mahal is in?', a: 'Agra', o: ['Agra', 'Delhi', 'Mumbai', 'Jaipur'] },
       { q: 'RAM stands for?', a: 'Random Access Memory', o: ['Random Access Memory', 'Read Access Memory', 'Run Access Machine', 'Remote Access Method'] },
       { q: 'Shape of stop sign?', a: 'Octagon', o: ['Octagon', 'Hexagon', 'Square', 'Circle'] },
       { q: 'Animal with trunk?', a: 'Elephant', o: ['Elephant', 'Hippo', 'Rhino', 'Giraffe'] },
@@ -175,11 +155,10 @@
     let current = 0;
     let score = 0;
     let timerInterval;
-
     const questionBox = document.getElementById('question');
     const optionsBox = document.getElementById('options');
     const progressPanel = document.getElementById('progressPanel');
-    const timerEl = document.getElementById('timer');
+    const timeDisplay = document.getElementById('timeLeft');
 
     for (let i = 1; i <= 30; i++) {
       const box = document.createElement('div');
@@ -192,48 +171,48 @@
 
     function loadQuestion() {
       if (current >= questions.length) {
-        clearInterval(timerInterval);
         document.getElementById('score-area').style.display = 'block';
         document.getElementById('score').innerText = score;
+        clearInterval(timerInterval);
         return;
       }
 
-      questionBox.innerText = `${current + 1}. ${questions[current].q}`;
-      optionsBox.innerHTML = '';
-      let shuffled = [...questions[current].o].sort(() => Math.random() - 0.5);
+      startTimer();
 
+      const q = questions[current];
+      questionBox.innerText = `${current + 1}. ${q.q}`;
+      optionsBox.innerHTML = '';
+
+      const shuffled = [...q.o].sort(() => Math.random() - 0.5);
       shuffled.forEach(opt => {
         const div = document.createElement('div');
         div.className = 'option';
         div.innerText = opt;
-        div.onclick = () => {
-          clearInterval(timerInterval);
-          selectAnswer(opt);
-        };
+        div.onclick = () => selectAnswer(opt);
         optionsBox.appendChild(div);
       });
-
-      startTimer();
     }
 
     function startTimer() {
       let time = 10;
-      timerEl.innerText = `Time: ${time}s`;
+      timeDisplay.innerText = time;
+      clearInterval(timerInterval);
       timerInterval = setInterval(() => {
         time--;
-        timerEl.innerText = `Time: ${time}s`;
+        timeDisplay.innerText = time;
         if (time <= 0) {
           clearInterval(timerInterval);
-          numberBoxes[current].classList.add('wrong');
+          numberBoxes[current].classList.add('timeout');
           current++;
           setTimeout(loadQuestion, 1000);
         }
       }, 1000);
     }
 
-    function selectAnswer(selected) {
-      const correct = questions[current].a;
-      if (selected === correct) {
+    function selectAnswer(opt) {
+      clearInterval(timerInterval);
+      const correct = questions[current].a === opt;
+      if (correct) {
         numberBoxes[current].classList.add('correct');
         score++;
       } else {
@@ -247,12 +226,8 @@
       const name = document.getElementById('username').value;
       const leaderboard = document.getElementById('leaderboard');
       const entry = document.createElement('div');
-      entry.innerText = `${name}: ${score}`;
+      entry.textContent = `${name}: ${score}/30`;
       leaderboard.appendChild(entry);
-    }
-
-    function toggleMode() {
-      document.body.classList.toggle('dark');
     }
 
     loadQuestion();
