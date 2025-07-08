@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ultimate Quiz Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+      --card: #f0f0f0;
+      --correct: #4caf50;
+      --wrong: #f44336;
+    }
+
+    body.dark {
+      --bg: #121212;
+      --text: #ffffff;
+      --card: #1e1e1e;
+    }
+
+    .side-panel {
+      width: 120px;
+      padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      align-content: flex-start;
+    }
+
+    .number-box {
+      width: 30px;
+      height: 30px;
+      background-color: #ccc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .correct {
+      background-color: var(--correct) !important;
+      color: #fff;
+    }
+
+    .wrong {
+      background-color: var(--wrong) !important;
+      color: #fff;
+    }
+
+    .quiz-container {
+      flex: 1;
+      padding: 30px;
+    }
+
+    .question-box {
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .option {
+      background: var(--card);
+      padding: 12px;
+      margin: 5px 0;
+      border: 1px solid #888;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .option:hover {
+      background-color: var(--correct);
+      color: white;
+    }
+
+    #score-area {
+      display: none;
+      margin-top: 20px;
+    }
+
+    #leaderboard {
+      margin-top: 15px;
+    }
+
+    #timer {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mode-toggle {
+      padding: 5px 10px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="side-panel" id="progressPanel"></div>
+
+  <div class="quiz-container">
+    <div class="top-bar">
+      <div id="timer">Time: 10s</div>
+      <button class="mode-toggle" onclick="toggleMode()">Toggle Mode</button>
+    </div>
+    <div class="question-box" id="question"></div>
+    <div class="options" id="options"></div>
+
+    <div id="score-area">
+      <h2>Game Over! Your Score: <span id="score"></span></h2>
+      <input type="text" id="username" placeholder="Your Name" />
+      <button onclick="addToLeaderboard()">Add to Leaderboard</button>
+      <div id="leaderboard"></div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      { q: 'Currency of Pakistan?', a: 'Rupee', o: ['Rupee', 'Taka', 'Dinar', 'Peso'] },
+      { q: 'Currency of USA?', a: 'Dollar', o: ['Dollar', 'Euro', 'Pound', 'Yen'] },
+      { q: 'Currency of Brazil?', a: 'Real', o: ['Peso', 'Real', 'Dollar', 'Lira'] },
+      { q: 'Currency of Iran?', a: 'Rial', o: ['Rial', 'Toman', 'Lira', 'Dinar'] },
+      { q: 'Currency of Russia?', a: 'Ruble', o: ['Ruble', 'Euro', 'Dinar', 'Krona'] },
+      { q: 'Currency of Afghanistan?', a: 'Afghani', o: ['Afghani', 'Taka', 'Rial', 'Dirham'] },
+      { q: 'Square root of 144?', a: '12', o: ['12', '14', '16', '10'] },
+      { q: '2^5 = ?', a: '32', o: ['32', '16', '64', '24'] },
+      { q: 'Fastest animal?', a: 'Cheetah', o: ['Cheetah', 'Leopard', 'Tiger', 'Lion'] },
+      { q: 'First prime number?', a: '2', o: ['2', '3', '1', '5'] },
+      { q: 'Result of 9*9?', a: '81', o: ['81', '72', '99', '90'] },
+      { q: 'Current unit of wire?', a: 'Ampere', o: ['Ampere', 'Volt', 'Watt', 'Ohm'] },
+      { q: 'Symbol of Gold?', a: 'Au', o: ['Au', 'Ag', 'Gd', 'Pb'] },
+      { q: 'Largest ocean?', a: 'Pacific', o: ['Pacific', 'Atlantic', 'Indian', 'Arctic'] },
+      { q: 'Planet known as red?', a: 'Mars', o: ['Mars', 'Jupiter', 'Venus', 'Neptune'] },
+      { q: '5th planet from Sun?', a: 'Jupiter', o: ['Jupiter', 'Saturn', 'Mars', 'Earth'] },
+      { q: 'H2O is?', a: 'Water', o: ['Water', 'Hydrogen', 'Oxygen', 'Ice'] },
+      { q: 'Keyboard shortcut for copy?', a: 'Ctrl+C', o: ['Ctrl+C', 'Ctrl+X', 'Ctrl+V', 'Ctrl+Z'] },
+      { q: 'Triangle angle total?', a: '180', o: ['180', '360', '90', '120'] },
+      { q: 'Hardest natural substance?', a: 'Diamond', o: ['Diamond', 'Steel', 'Gold', 'Quartz'] },
+      { q: 'Google CEO in 2023?', a: 'Sundar Pichai', o: ['Sundar Pichai', 'Satya Nadella', 'Elon Musk', 'Tim Cook'] },
+      { q: 'First periodic table element?', a: 'Hydrogen', o: ['Hydrogen', 'Helium', 'Oxygen', 'Lithium'] },
+      { q: 'Sun rises from?', a: 'East', o: ['East', 'West', 'North', 'South'] },
+      { q: 'Capital of UAE?', a: 'Abu Dhabi', o: ['Lahore', 'Islamabad', 'Abu Dhabi', 'Sayalcoat'] },
+      { q: 'RAM stands for?', a: 'Random Access Memory', o: ['Random Access Memory', 'Read Access Memory', 'Run Access Machine', 'Remote Access Method'] },
+      { q: 'Shape of stop sign?', a: 'Octagon', o: ['Octagon', 'Hexagon', 'Square', 'Circle'] },
+      { q: 'Animal with trunk?', a: 'Elephant', o: ['Elephant', 'Hippo', 'Rhino', 'Giraffe'] },
+      { q: 'Capital of France?', a: 'Paris', o: ['Paris', 'Berlin', 'London', 'Madrid'] },
+      { q: 'Number of continents?', a: '7', o: ['7', '6', '5', '8'] },
+      { q: 'Fastest bird?', a: 'Peregrine Falcon', o: ['Peregrine Falcon', 'Eagle', 'Sparrow', 'Owl'] }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let timerInterval;
+
+    const questionBox = document.getElementById('question');
+    const optionsBox = document.getElementById('options');
+    const progressPanel = document.getElementById('progressPanel');
+    const timerEl = document.getElementById('timer');
+
+    for (let i = 1; i <= 30; i++) {
+      const box = document.createElement('div');
+      box.className = 'number-box';
+      box.innerText = i;
+      progressPanel.appendChild(box);
+    }
+
+    const numberBoxes = document.querySelectorAll('.number-box');
+
+    function loadQuestion() {
+      if (current >= questions.length) {
+        clearInterval(timerInterval);
+        document.getElementById('score-area').style.display = 'block';
+        document.getElementById('score').innerText = score;
+        return;
+      }
+
+      questionBox.innerText = `${current + 1}. ${questions[current].q}`;
+      optionsBox.innerHTML = '';
+      let shuffled = [...questions[current].o].sort(() => Math.random() - 0.5);
+
+      shuffled.forEach(opt => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.innerText = opt;
+        div.onclick = () => {
+          clearInterval(timerInterval);
+          selectAnswer(opt);
+        };
+        optionsBox.appendChild(div);
+      });
+
+      startTimer();
+    }
+
+    function startTimer() {
+      let time = 10;
+      timerEl.innerText = `Time: ${time}s`;
+      timerInterval = setInterval(() => {
+        time--;
+        timerEl.innerText = `Time: ${time}s`;
+        if (time <= 0) {
+          clearInterval(timerInterval);
+          numberBoxes[current].classList.add('wrong');
+          current++;
+          setTimeout(loadQuestion, 1000);
+        }
+      }, 1000);
+    }
+
+    function selectAnswer(selected) {
+      const correct = questions[current].a;
+      if (selected === correct) {
+        numberBoxes[current].classList.add('correct');
+        score++;
+      } else {
+        numberBoxes[current].classList.add('wrong');
+      }
+      current++;
+      setTimeout(loadQuestion, 1000);
+    }
+
+    function addToLeaderboard() {
+      const name = document.getElementById('username').value;
+      const leaderboard = document.getElementById('leaderboard');
+      const entry = document.createElement('div');
+      entry.innerText = `${name}: ${score}`;
+      leaderboard.appendChild(entry);
+    }
+
+    function toggleMode() {
+      document.body.classList.toggle('dark');
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
