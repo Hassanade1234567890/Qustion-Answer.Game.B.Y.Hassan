@@ -2,197 +2,155 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Horizontal Levels Quiz</title>
+  <title>Quiz Game</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: black;
-      color: white;
+      margin: 0;
       font-family: Arial, sans-serif;
+      display: flex;
+    }
+
+    .side-panel {
+      width: 150px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: 40px;
+      gap: 6px;
+      padding: 10px;
+      background-color: #f0f0f0;
+    }
+
+    .number-box {
+      width: 40px;
+      height: 40px;
+      background-color: #ccc;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-    }
-
-    .container {
-      width: 95%;
-      max-width: 1200px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .level-tracker {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 8px;
-      margin-bottom: 20px;
-      width: 100%;
-    }
-
-    .level {
-      background-color: #333;
-      text-align: center;
-      padding: 10px 0;
-      border-radius: 6px;
       font-weight: bold;
+      border-radius: 6px;
     }
 
-    .correct { background-color: green; }
-    .wrong { background-color: red; }
-    .timeout { background-color: orange; color: black; }
+    .correct { background-color: #4caf50 !important; color: white; }
+    .wrong { background-color: #f44336 !important; color: white; }
+    .timeout { background-color: orange !important; color: white; }
 
-    .question {
-      background-color: #222;
-      font-size: 28px;
+    .quiz-container {
+      flex: 1;
       padding: 20px;
-      width: 100%;
-      border-radius: 10px;
-      text-align: center;
-      margin-bottom: 30px;
+    }
+
+    .question-box {
+      font-size: 20px;
+      margin-bottom: 15px;
     }
 
     .options {
       display: flex;
       flex-direction: column;
-      gap: 15px;
-      width: 100%;
+      gap: 10px;
     }
 
     .option {
-      padding: 18px;
-      background-color: #333;
-      border: 2px solid #888;
-      border-radius: 8px;
-      font-size: 20px;
-      text-align: center;
+      padding: 10px;
+      border: 1px solid #888;
+      border-radius: 6px;
       cursor: pointer;
-      transition: 0.3s;
+      background: #fff;
+      transition: 0.2s ease;
     }
 
     .option:hover {
-      background-color: #555;
-      border-color: white;
+      background-color: #4caf50;
+      color: white;
     }
 
     #timer {
-      font-size: 20px;
-      color: yellow;
-      margin-bottom: 15px;
-    }
-
-    #score-area {
-      margin-top: 30px;
-      display: none;
-      text-align: center;
-    }
-
-    input {
-      padding: 8px;
-      margin-top: 10px;
-      width: 200px;
-    }
-
-    button {
-      padding: 8px 16px;
-      margin-top: 10px;
-      cursor: pointer;
+      font-size: 18px;
+      margin-bottom: 10px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="level-tracker" id="row1"></div>
-    <div class="level-tracker" id="row2"></div>
-    <div class="level-tracker" id="row3"></div>
 
-    <div id="timer">⏱ Time left: <span id="timeLeft">10</span>s</div>
-    <div class="question" id="question">Loading question...</div>
+  <div class="side-panel" id="progressPanel"></div>
+
+  <div class="quiz-container">
+    <div id="timer"></div>
+    <div class="question-box" id="question"></div>
     <div class="options" id="options"></div>
-
-    <div id="score-area">
-      <h2>Your Score: <span id="score"></span></h2>
-      <input type="text" id="username" placeholder="Enter your name" />
-      <br />
-      <button onclick="addToLeaderboard()">Submit</button>
-      <div id="leaderboard"></div>
-    </div>
   </div>
 
   <script>
     const questions = [
-      { q: 'Currency of Pakistan?', a: 'Rupee', o: ['Rupee', 'Taka', 'Dinar', 'Peso'] },
-      { q: 'Currency of USA?', a: 'Dollar', o: ['Dollar', 'Euro', 'Pound', 'Yen'] },
-      { q: 'Currency of Brazil?', a: 'Real', o: ['Peso', 'Real', 'Dollar', 'Lira'] },
-      { q: 'Currency of Iran?', a: 'Rial', o: ['Rial', 'Toman', 'Lira', 'Dinar'] },
-      { q: 'Currency of Russia?', a: 'Ruble', o: ['Ruble', 'Euro', 'Dinar', 'Krona'] },
-      { q: 'Currency of Afghanistan?', a: 'Afghani', o: ['Afghani', 'Taka', 'Rial', 'Dirham'] },
-      { q: 'Square root of 144?', a: '12', o: ['12', '14', '16', '10'] },
+      { q: 'Currency of Pakistan?', a: 'Rupee', o: ['Rupee', 'Dinar', 'Peso', 'Lira'] },
+      { q: 'Currency of USA?', a: 'Dollar', o: ['Dollar', 'Euro', 'Yen', 'Pound'] },
+      { q: 'Currency of Brazil?', a: 'Real', o: ['Real', 'Peso', 'Ruble', 'Dirham'] },
+      { q: 'Currency of Iran?', a: 'Rial', o: ['Rial', 'Toman', 'Lira', 'Krone'] },
+      { q: 'Currency of Russia?', a: 'Ruble', o: ['Ruble', 'Dinar', 'Euro', 'Real'] },
+      { q: 'Currency of Afghanistan?', a: 'Afghani', o: ['Afghani', 'Rial', 'Dirham', 'Taka'] },
+      { q: 'Fastest bird?', a: 'Peregrine Falcon', o: ['Peregrine Falcon', 'Eagle', 'Sparrow', 'Crow'] },
+      { q: 'Fastest animal?', a: 'Cheetah', o: ['Cheetah', 'Leopard', 'Jaguar', 'Tiger'] },
+      { q: 'Square root of 144?', a: '12', o: ['12', '10', '14', '16'] },
       { q: '2^5 = ?', a: '32', o: ['32', '16', '64', '24'] },
-      { q: 'Fastest animal?', a: 'Cheetah', o: ['Cheetah', 'Leopard', 'Tiger', 'Lion'] },
       { q: 'First prime number?', a: '2', o: ['2', '3', '1', '5'] },
-      { q: 'Result of 9*9?', a: '81', o: ['81', '72', '99', '90'] },
-      { q: 'Current of wire?', a: 'Ampere', o: ['Ampere', 'Volt', 'Watt', 'Ohm'] },
-      { q: 'Symbol of Gold?', a: 'Au', o: ['Au', 'Ag', 'Gd', 'Pb'] },
+      { q: '9*9 = ?', a: '81', o: ['81', '72', '99', '90'] },
+      { q: 'Unit of current?', a: 'Ampere', o: ['Ampere', 'Volt', 'Ohm', 'Watt'] },
+      { q: 'Symbol of Gold?', a: 'Au', o: ['Au', 'Ag', 'Pb', 'Gd'] },
       { q: 'Largest ocean?', a: 'Pacific', o: ['Pacific', 'Atlantic', 'Indian', 'Arctic'] },
-      { q: 'Planet known as red?', a: 'Mars', o: ['Mars', 'Jupiter', 'Venus', 'Neptune'] },
-      { q: '5th planet?', a: 'Jupiter', o: ['Jupiter', 'Saturn', 'Mars', 'Earth'] },
-      { q: 'H2O is?', a: 'Water', o: ['Water', 'Hydrogen', 'Oxygen', 'Ice'] },
-      { q: 'Keyboard key for copy?', a: 'Ctrl+C', o: ['Ctrl+C', 'Ctrl+X', 'Ctrl+V', 'Ctrl+Z'] },
+      { q: 'Red planet?', a: 'Mars', o: ['Mars', 'Jupiter', 'Saturn', 'Venus'] },
+      { q: '5th planet?', a: 'Jupiter', o: ['Jupiter', 'Mars', 'Saturn', 'Neptune'] },
+      { q: 'H2O is?', a: 'Water', o: ['Water', 'Oxygen', 'Hydrogen', 'Ice'] },
+      { q: 'Copy shortcut?', a: 'Ctrl+C', o: ['Ctrl+C', 'Ctrl+X', 'Ctrl+V', 'Ctrl+Z'] },
       { q: 'Angle in triangle?', a: '180', o: ['180', '360', '90', '120'] },
-      { q: 'Hardest substance?', a: 'Diamond', o: ['Diamond', 'Steel', 'Gold', 'Quartz'] },
-      { q: 'Google CEO 2023?', a: 'Sundar Pichai', o: ['Sundar Pichai', 'Satya Nadella', 'Elon Musk', 'Tim Cook'] },
-      { q: 'First element in periodic table?', a: 'Hydrogen', o: ['Hydrogen', 'Helium', 'Oxygen', 'Lithium'] },
+      { q: 'Hardest substance?', a: 'Diamond', o: ['Diamond', 'Quartz', 'Steel', 'Gold'] },
+      { q: 'CEO of Google?', a: 'Sundar Pichai', o: ['Sundar Pichai', 'Elon Musk', 'Satya Nadella', 'Tim Cook'] },
+      { q: 'First periodic element?', a: 'Hydrogen', o: ['Hydrogen', 'Helium', 'Oxygen', 'Lithium'] },
       { q: 'Sun rises from?', a: 'East', o: ['East', 'West', 'North', 'South'] },
-      { q: 'Taj Mahal is in?', a: 'Agra', o: ['Agra', 'Delhi', 'Mumbai', 'Jaipur'] },
-      { q: 'RAM stands for?', a: 'Random Access Memory', o: ['Random Access Memory', 'Read Access Memory', 'Run Access Machine', 'Remote Access Method'] },
-      { q: 'Shape of stop sign?', a: 'Octagon', o: ['Octagon', 'Hexagon', 'Square', 'Circle'] },
-      { q: 'Animal with trunk?', a: 'Elephant', o: ['Elephant', 'Hippo', 'Rhino', 'Giraffe'] },
-      { q: 'Capital of France?', a: 'Paris', o: ['Paris', 'Berlin', 'London', 'Madrid'] },
-      { q: 'Number of continents?', a: '7', o: ['7', '6', '5', '8'] },
-      { q: 'Fastest bird?', a: 'Peregrine Falcon', o: ['Peregrine Falcon', 'Eagle', 'Sparrow', 'Owl'] }
+      { q: 'Taj Mahal city?', a: 'Agra', o: ['Agra', 'Delhi', 'Jaipur', 'Mumbai'] },
+      { q: 'RAM stands for?', a: 'Random Access Memory', o: ['Random Access Memory', 'Run Active Machine', 'Remote Access Method', 'Read Access Memory'] },
+      { q: 'Shape of STOP sign?', a: 'Octagon', o: ['Octagon', 'Hexagon', 'Circle', 'Square'] },
+      { q: 'Animal with trunk?', a: 'Elephant', o: ['Elephant', 'Rhino', 'Hippo', 'Giraffe'] },
+      { q: 'Capital of France?', a: 'Paris', o: ['Paris', 'Berlin', 'London', 'Rome'] },
+      { q: 'How many continents?', a: '7', o: ['7', '6', '5', '8'] }
     ];
 
-    let current = 0;
-    let score = 0;
-    let timer;
-    const timeEl = document.getElementById('timeLeft');
-    const questionEl = document.getElementById('question');
-    const optionsEl = document.getElementById('options');
-    const scoreEl = document.getElementById('score');
-    const leaderboard = document.getElementById('leaderboard');
+    let current = 0, score = 0, timer;
+    const timerBox = document.getElementById('timer');
+    const questionBox = document.getElementById('question');
+    const optionsBox = document.getElementById('options');
+    const progressPanel = document.getElementById('progressPanel');
 
-    const levelBoxes = [];
-
-    for (let i = 0; i < 30; i++) {
-      const div = document.createElement('div');
-      div.className = 'level';
-      div.textContent = i + 1;
-      const row = i < 10 ? 'row1' : i < 20 ? 'row2' : 'row3';
-      document.getElementById(row).appendChild(div);
-      levelBoxes.push(div);
+    for (let row = 0; row < 10; row++) {
+      for (let col = 0; col < 3; col++) {
+        const num = row + 1 + col * 10;
+        const div = document.createElement('div');
+        div.innerText = num;
+        div.classList.add('number-box');
+        progressPanel.appendChild(div);
+      }
     }
+
+    const numberBoxes = document.querySelectorAll('.number-box');
 
     function loadQuestion() {
       if (current >= questions.length) {
-        document.getElementById('score-area').style.display = 'block';
-        scoreEl.textContent = score;
         clearInterval(timer);
+        questionBox.innerText = `Game Over! Score: ${score}/30`;
+        optionsBox.innerHTML = '';
         return;
       }
 
-      const q = questions[current];
-      questionEl.textContent = `${current + 1}. ${q.q}`;
-      optionsEl.innerHTML = '';
-
-      const shuffled = [...q.o].sort(() => Math.random() - 0.5);
+      questionBox.innerText = `${current + 1}. ${questions[current].q}`;
+      optionsBox.innerHTML = '';
+      let shuffled = [...questions[current].o].sort(() => Math.random() - 0.5);
       shuffled.forEach(opt => {
         const div = document.createElement('div');
         div.className = 'option';
-        div.textContent = opt;
+        div.innerText = opt;
         div.onclick = () => checkAnswer(opt);
-        optionsEl.appendChild(div);
+        optionsBox.appendChild(div);
       });
 
       startTimer();
@@ -200,38 +158,31 @@
 
     function startTimer() {
       let time = 10;
-      timeEl.textContent = time;
+      timerBox.innerText = `⏳ Time: ${time}s`;
       clearInterval(timer);
       timer = setInterval(() => {
         time--;
-        timeEl.textContent = time;
+        timerBox.innerText = `⏳ Time: ${time}s`;
         if (time <= 0) {
           clearInterval(timer);
-          levelBoxes[current].classList.add('timeout');
+          numberBoxes[current].classList.add('timeout');
           current++;
-          setTimeout(loadQuestion, 800);
+          setTimeout(loadQuestion, 1000);
         }
       }, 1000);
     }
 
-    function checkAnswer(ans) {
+    function checkAnswer(opt) {
       clearInterval(timer);
-      const correct = questions[current].a;
-      if (ans === correct) {
+      const correct = opt === questions[current].a;
+      if (correct) {
+        numberBoxes[current].classList.add('correct');
         score++;
-        levelBoxes[current].classList.add('correct');
       } else {
-        levelBoxes[current].classList.add('wrong');
+        numberBoxes[current].classList.add('wrong');
       }
       current++;
-      setTimeout(loadQuestion, 800);
-    }
-
-    function addToLeaderboard() {
-      const name = document.getElementById('username').value;
-      const entry = document.createElement('div');
-      entry.textContent = `${name}: ${score}/30`;
-      leaderboard.appendChild(entry);
+      setTimeout(loadQuestion, 1000);
     }
 
     loadQuestion();
