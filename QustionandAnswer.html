@@ -2,118 +2,120 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Ultimate Quiz Game</title>
+  <title>Horizontal Levels Quiz</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
+      background: black;
+      color: white;
       font-family: Arial, sans-serif;
-      display: flex;
-      min-height: 100vh;
-      background-color: #f2f2f2;
-    }
-
-    .side-panel {
-      width: 120px;
-      background: #e0e0e0;
-      display: flex;
-      flex-wrap: wrap;
-      padding: 10px;
-      gap: 6px;
-      justify-content: center;
-      align-content: flex-start;
-    }
-
-    .number-box {
-      width: 30px;
-      height: 30px;
-      border-radius: 5px;
-      background-color: #bbb;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-weight: bold;
-      font-size: 14px;
+      min-height: 100vh;
     }
 
-    .correct {
-      background-color: #4caf50 !important;
-      color: white;
+    .container {
+      width: 95%;
+      max-width: 1200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .wrong {
-      background-color: #f44336 !important;
-      color: white;
-    }
-
-    .timeout {
-      background-color: orange !important;
-      color: white;
-    }
-
-    .quiz-container {
-      flex: 1;
-      padding: 30px;
-    }
-
-    .question-box {
-      font-size: 20px;
+    .level-tracker {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
       margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .level {
+      background-color: #333;
+      text-align: center;
+      padding: 10px 0;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .correct { background-color: green; }
+    .wrong { background-color: red; }
+    .timeout { background-color: orange; color: black; }
+
+    .question {
+      background-color: #222;
+      font-size: 28px;
+      padding: 20px;
+      width: 100%;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 30px;
     }
 
     .options {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 15px;
+      width: 100%;
     }
 
     .option {
-      padding: 12px;
-      border: 1px solid #666;
-      border-radius: 6px;
+      padding: 18px;
+      background-color: #333;
+      border: 2px solid #888;
+      border-radius: 8px;
+      font-size: 20px;
+      text-align: center;
       cursor: pointer;
-      background: white;
+      transition: 0.3s;
     }
 
     .option:hover {
-      background-color: #4caf50;
-      color: white;
+      background-color: #555;
+      border-color: white;
     }
 
     #timer {
-      font-weight: bold;
+      font-size: 20px;
+      color: yellow;
       margin-bottom: 15px;
-      font-size: 16px;
-      color: #333;
     }
 
     #score-area {
+      margin-top: 30px;
       display: none;
-      margin-top: 20px;
+      text-align: center;
     }
 
-    #leaderboard {
+    input {
+      padding: 8px;
       margin-top: 10px;
+      width: 200px;
+    }
+
+    button {
+      padding: 8px 16px;
+      margin-top: 10px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <div class="level-tracker" id="row1"></div>
+    <div class="level-tracker" id="row2"></div>
+    <div class="level-tracker" id="row3"></div>
 
-  <div class="side-panel" id="progressPanel"></div>
-
-  <div class="quiz-container">
-    <div id="timer">Time left: <span id="timeLeft">10</span> sec</div>
-    <div class="question-box" id="question"></div>
+    <div id="timer">⏱ Time left: <span id="timeLeft">10</span>s</div>
+    <div class="question" id="question">Loading question...</div>
     <div class="options" id="options"></div>
 
     <div id="score-area">
-      <h2>Game Over! Your Score: <span id="score"></span></h2>
-      <input type="text" id="username" placeholder="Your Name" />
-      <button onclick="addToLeaderboard()">Submit Score</button>
+      <h2>Your Score: <span id="score"></span></h2>
+      <input type="text" id="username" placeholder="Enter your name" />
+      <br />
+      <button onclick="addToLeaderboard()">Submit</button>
       <div id="leaderboard"></div>
     </div>
   </div>
@@ -143,6 +145,7 @@
       { q: 'Google CEO 2023?', a: 'Sundar Pichai', o: ['Sundar Pichai', 'Satya Nadella', 'Elon Musk', 'Tim Cook'] },
       { q: 'First element in periodic table?', a: 'Hydrogen', o: ['Hydrogen', 'Helium', 'Oxygen', 'Lithium'] },
       { q: 'Sun rises from?', a: 'East', o: ['East', 'West', 'North', 'South'] },
+      { q: 'Taj Mahal is in?', a: 'Agra', o: ['Agra', 'Delhi', 'Mumbai', 'Jaipur'] },
       { q: 'RAM stands for?', a: 'Random Access Memory', o: ['Random Access Memory', 'Read Access Memory', 'Run Access Machine', 'Remote Access Method'] },
       { q: 'Shape of stop sign?', a: 'Octagon', o: ['Octagon', 'Hexagon', 'Square', 'Circle'] },
       { q: 'Animal with trunk?', a: 'Elephant', o: ['Elephant', 'Hippo', 'Rhino', 'Giraffe'] },
@@ -153,77 +156,79 @@
 
     let current = 0;
     let score = 0;
-    let timerInterval;
-    const questionBox = document.getElementById('question');
-    const optionsBox = document.getElementById('options');
-    const progressPanel = document.getElementById('progressPanel');
-    const timeDisplay = document.getElementById('timeLeft');
+    let timer;
+    const timeEl = document.getElementById('timeLeft');
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const scoreEl = document.getElementById('score');
+    const leaderboard = document.getElementById('leaderboard');
 
-    for (let i = 1; i <= 30; i++) {
-      const box = document.createElement('div');
-      box.className = 'number-box';
-      box.innerText = i;
-      progressPanel.appendChild(box);
+    const levelBoxes = [];
+
+    for (let i = 0; i < 30; i++) {
+      const div = document.createElement('div');
+      div.className = 'level';
+      div.textContent = i + 1;
+      const row = i < 10 ? 'row1' : i < 20 ? 'row2' : 'row3';
+      document.getElementById(row).appendChild(div);
+      levelBoxes.push(div);
     }
-
-    const numberBoxes = document.querySelectorAll('.number-box');
 
     function loadQuestion() {
       if (current >= questions.length) {
         document.getElementById('score-area').style.display = 'block';
-        document.getElementById('score').innerText = score;
-        clearInterval(timerInterval);
+        scoreEl.textContent = score;
+        clearInterval(timer);
         return;
       }
 
-      startTimer();
-
       const q = questions[current];
-      questionBox.innerText = `${current + 1}. ${q.q}`;
-      optionsBox.innerHTML = '';
+      questionEl.textContent = `${current + 1}. ${q.q}`;
+      optionsEl.innerHTML = '';
 
       const shuffled = [...q.o].sort(() => Math.random() - 0.5);
       shuffled.forEach(opt => {
         const div = document.createElement('div');
         div.className = 'option';
-        div.innerText = opt;
-        div.onclick = () => selectAnswer(opt);
-        optionsBox.appendChild(div);
+        div.textContent = opt;
+        div.onclick = () => checkAnswer(opt);
+        optionsEl.appendChild(div);
       });
+
+      startTimer();
     }
 
     function startTimer() {
       let time = 10;
-      timeDisplay.innerText = time;
-      clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
+      timeEl.textContent = time;
+      clearInterval(timer);
+      timer = setInterval(() => {
         time--;
-        timeDisplay.innerText = time;
+        timeEl.textContent = time;
         if (time <= 0) {
-          clearInterval(timerInterval);
-          numberBoxes[current].classList.add('timeout');
+          clearInterval(timer);
+          levelBoxes[current].classList.add('timeout');
           current++;
-          setTimeout(loadQuestion, 1000);
+          setTimeout(loadQuestion, 800);
         }
       }, 1000);
     }
 
-    function selectAnswer(opt) {
-      clearInterval(timerInterval);
-      const correct = questions[current].a === opt;
-      if (correct) {
-        numberBoxes[current].classList.add('correct');
+    function checkAnswer(ans) {
+      clearInterval(timer);
+      const correct = questions[current].a;
+      if (ans === correct) {
         score++;
+        levelBoxes[current].classList.add('correct');
       } else {
-        numberBoxes[current].classList.add('wrong');
+        levelBoxes[current].classList.add('wrong');
       }
       current++;
-      setTimeout(loadQuestion, 1000);
+      setTimeout(loadQuestion, 800);
     }
 
     function addToLeaderboard() {
       const name = document.getElementById('username').value;
-      const leaderboard = document.getElementById('leaderboard');
       const entry = document.createElement('div');
       entry.textContent = `${name}: ${score}/30`;
       leaderboard.appendChild(entry);
